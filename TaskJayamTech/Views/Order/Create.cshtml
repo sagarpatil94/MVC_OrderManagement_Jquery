@@ -1,0 +1,179 @@
+﻿@model TaskJayamTech.Models.Order
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+
+<h4>Order</h4>
+<hr />
+<div>
+    <form asp-controller="Order" asp-action="Create" id="myform" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @*   <div class="form-group" hidden>
+        <label asp-for="Id" class="control-label"></label>
+        <input asp-for="Id" class="form-control" />
+        <span asp-validation-for="Id" class="text-danger"></span>
+        </div>*@
+        <div class="row">
+            <div class="form-group col-md-6">
+                <label  class="control-label">Customer </label>
+                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerList">
+                    <option value="">-- Select Customer --</option>
+                </select>
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group col-md-6">
+                <label asp-for="OrderDate" class="control-label"></label>
+                <input asp-for="OrderDate" id="OrderDate" class="form-control" />
+                <span asp-validation-for="OrderDate" class="text-danger"></span>
+            </div>
+            <div />
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label asp-for="Remark" class="control-label"></label>
+                    <input asp-for="Remark" class="form-control" />
+                    <span asp-validation-for="Remark" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-6">
+                    <label asp-for="OrderNumber" class="control-label"></label>
+                    <input asp-for="OrderNumber" readonly value="@ViewBag.OrderNumber" class="form-control" />
+                    <span asp-validation-for="OrderNumber" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-2">
+                    <label  class="control-label">Items</label>
+                    <select id="Item" asp-for="ItemId" class="form-control" asp-items="ViewBag.ItemList">
+                        <option value="">-- Select Item --</option>
+                    </select>
+                    <span asp-validatio n-for="ItemId" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-2">
+                    <label asp-for="Quantity" class="control-label"></label>
+                    <input asp-for="Quantity" id="Quantity" class="form-control" />
+                    <span asp-validation-for="Quantity" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label asp-for="Price" class="control-label"></label>
+                    <input asp-for="Price" id="Price" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label asp-for="Total" class="control-label"></label>
+                    <input asp-for="Total" id="Total" class="form-control" readonly />
+                    <span asp-validation-for="Total" class="text-danger"></span>
+                </div>
+
+                <div class="form-group col-md-2">
+                    <label asp-for="GST" class="control-label"></label>
+                    <input asp-for="GST" id="gst" readonly class="form-control" />
+                    <span asp-validation-for="GST" class="text-danger"></span>
+                </div>
+                <div class="form-group col-md-2">
+                    <label asp-for="LineTotal" class="control-label"></label>
+                    <input asp-for="LineTotal" id="lineitem" readonly class="form-control" />
+                    <span asp-validation-for="LineTotal" class="text-danger"></span>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-6 ">
+                <a href="#">+AddMore</a>
+            </div>
+            <div class="form-group col-md-6">
+                <label asp-for="OrderTotal" class="control-label"></label>
+                <input asp-for="OrderTotal" class="form-control" />
+                <span asp-validation-for="OrderTotal" class="text-danger"></span>
+            </div>
+            <div>
+            </div>
+            <div class="row p-2">
+                <div class="form-group col-8">
+                </div>
+
+                <div class="form-group col-4">
+                    <input id="savebtn" type="submit" value="SaveOrder" class="btn btn-primary" />
+                    <input id="cancelbtn" value="Cancel" style="margin:auto" class="btn btn-danger" />
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Event handler for ItemId dropdown change
+            $('#Item').change(function () {
+                
+                var itemId = $(this).val(); // Get the selected item id
+                // Make an AJAX request to fetch the price for the selected item
+                $.ajax({
+                    url: `/Order/GetItemById?itemId=${itemId}`, // Replace with your actual endpoint URL
+                    type: 'GET',
+                    // Send selected item id to the server
+                    success: function (response) {
+                        // Update the Price input field with the fetched price
+                        if (response && response.length > 0) {
+                            // Update the Price input field with the fetched price
+                            $('#Price').val(response[0].price);
+                          
+                        } else {
+                            // Handle empty or invalid response
+                            console.error('Empty or invalid response.');
+                        }
+                    },
+                    error: function () {
+                        console.error('Error fetching item price');
+                    }
+                });
+            });
+           
+             $('#Quantity, #Price').on('change', calculateTotal);
+            // Bind the validation function to the change event of the OrderDate input
+            $('#OrderDate').change(validateOrderDate);
+            function validateOrderDate() {
+                debugger
+                var orderDate = new Date($('#OrderDate').val());
+                var today = new Date();
+
+                if (orderDate < today) {
+                    alert("Order date cannot be in the past.");
+                    $('#OrderDate').val(''); // Clear the value
+                }
+            }
+
+            function calculateTotal() {
+                var quantity = parseFloat($('#Quantity').val()) || 0; // Get quantity value
+                var price = parseFloat($('#Price').val()) || 0; // Get price value
+                var total = quantity * price;// Calculate total price
+                var gstPercentage = 0.05;
+                $('#Total').val(total.toFixed(2)); // Update Total input field with calculated total, rounded to 2 decimal places
+               
+                var total = parseFloat($('#Total').val()) || 0; // Get total value
+                var gstPercentage = 0.05; // GST percentage (5%)
+                var gst = total * gstPercentage;
+                var lineTotal = total + gst;
+                $('#gst').val(gst.toFixed(2));
+                $('#lineitem').val(lineTotal.toFixed(2));
+            }
+        });
+    </script>

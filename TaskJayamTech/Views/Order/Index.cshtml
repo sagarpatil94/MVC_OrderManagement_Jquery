@@ -1,0 +1,88 @@
+﻿@model IEnumerable<TaskJayamTech.Models.OrderVm>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-controller="Order" asp-action="Create">Create New</a>
+</p>
+@if (TempData.ContainsKey("AlertMsg"))
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+           @Html.Raw(@TempData["AlertMsg"])
+            </div>
+        </div>
+    </div>
+}
+<br/>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Remark)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Ordertotal)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrderDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrderNumber)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Remark)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Ordertotal)
+                </td>
+                <td>
+                    <div>
+                        @Html.ActionLink("Edit", "Create", new {  id=item.Id }, new { @class = "btn btn-info", @title = "Edit" })
+
+                        @Html.ActionLink("Delete", "Delete", new {  id=item.Id }, new { @class = "btn btn-danger", @title = "Delete", onclick = "return confirm('Are you sure you want to delete this item?');" })
+
+                    </div>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(document).ready(function(){
+        setTimeout(function(){
+            $('.alert').alert('close');
+        },2000);
+    })
+</script>
